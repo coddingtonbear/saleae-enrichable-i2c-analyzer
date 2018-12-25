@@ -22,85 +22,128 @@ void EnrichableI2cAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel&
 	//we only need to pay attention to 'channel' if we're making bubbles for more than one channel (as set by AddChannelBubblesWillAppearOn)
 	ClearResultStrings();
 	Frame frame = GetFrame( frame_index );
+	std::stringstream outputStream;
 
-	char ack[32];
-	if( ( frame.mFlags & I2C_FLAG_ACK ) != 0 )
-		snprintf( ack, sizeof(ack), "ACK" );
-	else if( ( frame.mFlags & I2C_MISSING_FLAG_ACK ) != 0 )
-		snprintf( ack, sizeof( ack ), "Missing ACK/NAK" );
-	else
-		snprintf( ack, sizeof(ack), "NAK" );
+	if(mAnalyzer->featureBubble) {
+		U64 packet_id = GetPacketContainingFrameSequential( frame_index );
 
-	if( frame.mType == I2cAddress )
-	{
-		char number_str[128];
-		switch( mSettings->mAddressDisplay )
-		{
-		case NO_DIRECTION_7:
-			AnalyzerHelpers::GetNumberString( frame.mData1 >> 1, display_base, 7, number_str, 128 );
-			break;
-		case NO_DIRECTION_8:
-			AnalyzerHelpers::GetNumberString( frame.mData1 & 0xFE, display_base, 8, number_str, 128 );
-			break;
-		case YES_DIRECTION_8:
-			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
-			break;
+		outputStream << BUBBLE_PREFIX;
+		outputStream << UNIT_SEPARATOR;
+		if(packet_id != INVALID_RESULT_INDEX) {
+			outputStream << std::hex << packet_id;
 		}
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << frame_index;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << frame.mStartingSampleInclusive;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << frame.mEndingSampleInclusive;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << (U64)frame.mType;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << (U64)frame.mFlags;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << SDA_PREFIX;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << frame.mData1;
+		outputStream << LINE_SEPARATOR;
+		std::string value = outputStream.str();
 
-		I2cDirection direction;
-		if( ( frame.mData1 & 0x1 ) != 0 )
-			direction = I2C_READ;
+		mAnalyzer->LockSubprocess();
+		mAnalyzer->SendOutputLine(value.c_str(), value.length());
+		char bubbleText[256];
+		while(true) {
+			mAnalyzer->GetInputLine(
+				bubbleText,
+				256
+			);
+			if(strlen(bubbleText) > 0) {
+				AddResultString(bubbleText);
+			} else {
+				break;
+			}
+		}
+		mAnalyzer->UnlockSubprocess();
+	} else {
+		char ack[32];
+		if( ( frame.mFlags & I2C_FLAG_ACK ) != 0 )
+			snprintf( ack, sizeof(ack), "ACK" );
+		else if( ( frame.mFlags & I2C_MISSING_FLAG_ACK ) != 0 )
+			snprintf( ack, sizeof( ack ), "Missing ACK/NAK" );
 		else
-			direction = I2C_WRITE;
+			snprintf( ack, sizeof(ack), "NAK" );
 
-		if( direction == I2C_READ )
+		if( frame.mType == I2cAddress )
 		{
-			std::stringstream ss;
-			AddResultString( "R" );
+			char number_str[128];
+			switch( mSettings->mAddressDisplay )
+			{
+			case NO_DIRECTION_7:
+				AnalyzerHelpers::GetNumberString( frame.mData1 >> 1, display_base, 7, number_str, 128 );
+				break;
+			case NO_DIRECTION_8:
+				AnalyzerHelpers::GetNumberString( frame.mData1 & 0xFE, display_base, 8, number_str, 128 );
+				break;
+			case YES_DIRECTION_8:
+				AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
+				break;
+			}
 
-			ss << "R[" << number_str << "]";
-			AddResultString( ss.str().c_str() );
-			ss.str("");
+			I2cDirection direction;
+			if( ( frame.mData1 & 0x1 ) != 0 )
+				direction = I2C_READ;
+			else
+				direction = I2C_WRITE;
 
-			ss << "Read [" << number_str << "]";
-			AddResultString( ss.str().c_str() );
-			ss.str("");
+			if( direction == I2C_READ )
+			{
+				std::stringstream ss;
+				AddResultString( "R" );
 
-			ss << "Read [" << number_str << "] + " << ack;
-			AddResultString( ss.str().c_str() );
-			ss.str("");	
+				ss << "R[" << number_str << "]";
+				AddResultString( ss.str().c_str() );
+				ss.str("");
 
-			ss << "Setup Read to [" << number_str << "] + " << ack;
-			AddResultString( ss.str().c_str() );
+				ss << "Read [" << number_str << "]";
+				AddResultString( ss.str().c_str() );
+				ss.str("");
+
+				ss << "Read [" << number_str << "] + " << ack;
+				AddResultString( ss.str().c_str() );
+				ss.str("");	
+
+				ss << "Setup Read to [" << number_str << "] + " << ack;
+				AddResultString( ss.str().c_str() );
+			}else
+			{
+				std::stringstream ss;
+				ss << "W[" << number_str << "]";
+				AddResultString( ss.str().c_str() );
+				ss.str("");
+
+				ss << "Write [" << number_str << "]";
+				AddResultString( ss.str().c_str() );
+				ss.str("");
+
+				ss << "Write [" << number_str << "] + " << ack;
+				AddResultString( ss.str().c_str() );
+				ss.str("");	
+
+				ss << "Setup Write to [" << number_str << "] + " << ack;
+				AddResultString( ss.str().c_str() );
+			}
 		}else
 		{
+			char number_str[128];
+			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
+
+			AddResultString( number_str );
+
 			std::stringstream ss;
-			ss << "W[" << number_str << "]";
-			AddResultString( ss.str().c_str() );
-			ss.str("");
-
-			ss << "Write [" << number_str << "]";
-			AddResultString( ss.str().c_str() );
-			ss.str("");
-
-			ss << "Write [" << number_str << "] + " << ack;
-			AddResultString( ss.str().c_str() );
-			ss.str("");	
-
-			ss << "Setup Write to [" << number_str << "] + " << ack;
+			ss << number_str << " + " << ack;
 			AddResultString( ss.str().c_str() );
 		}
-	}else
-	{
-		char number_str[128];
-		AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
-
-		AddResultString( number_str );
-
-		std::stringstream ss;
-		ss << number_str << " + " << ack;
-		AddResultString( ss.str().c_str() );
-	}													
+	}
 }
 
 void EnrichableI2cAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 /*export_type_user_id*/ )
@@ -204,55 +247,99 @@ void EnrichableI2cAnalyzerResults::GenerateFrameTabularText( U64 frame_index, Di
 
 	Frame frame = GetFrame( frame_index );
 
-	char ack[32];
-	if( ( frame.mFlags & I2C_FLAG_ACK ) != 0 )
-		snprintf( ack, sizeof(ack), "ACK" );
-	else if( ( frame.mFlags & I2C_MISSING_FLAG_ACK ) != 0 )
-		snprintf( ack, sizeof( ack ), "Missing ACK/NAK" );
-	else
-		snprintf( ack, sizeof(ack), "NAK" );
+	if(mAnalyzer->featureTabular) {
+		U64 packet_id = GetPacketContainingFrameSequential( frame_index );
+		std::stringstream outputStream;
 
-	if( frame.mType == I2cAddress )
-	{
-		char number_str[128];
-		switch( mSettings->mAddressDisplay )
-		{
-		case NO_DIRECTION_7:
-			AnalyzerHelpers::GetNumberString( frame.mData1 >> 1, display_base, 7, number_str, 128 );
-			break;
-		case NO_DIRECTION_8:
-			AnalyzerHelpers::GetNumberString( frame.mData1 & 0xFE, display_base, 8, number_str, 128 );
-			break;
-		case YES_DIRECTION_8:
-			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
-			break;
+		outputStream << TABULAR_PREFIX;
+		outputStream << UNIT_SEPARATOR;
+		if(packet_id != INVALID_RESULT_INDEX) {
+			outputStream << std::hex << packet_id;
 		}
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << frame_index;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << frame.mStartingSampleInclusive;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << frame.mEndingSampleInclusive;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << (U64)frame.mType;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << (U64)frame.mFlags;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << frame.mData1;
+		outputStream << UNIT_SEPARATOR;
+		outputStream << std::hex << frame.mData2;
+		outputStream << LINE_SEPARATOR;
 
-		I2cDirection direction;
-		if( ( frame.mData1 & 0x1 ) != 0 )
-			direction = I2C_READ;
+		std::string value = outputStream.str();
+
+		mAnalyzer->LockSubprocess();
+		mAnalyzer->SendOutputLine(value.c_str(), value.length());
+		char tabularText[512];
+		while(true) {
+			mAnalyzer->GetInputLine(
+				tabularText,
+				512
+			);
+			if(strlen(tabularText) > 0) {
+				AddTabularText(tabularText);
+			} else {
+				break;
+			}
+		}
+		mAnalyzer->UnlockSubprocess();
+	} else {
+		char ack[32];
+		if( ( frame.mFlags & I2C_FLAG_ACK ) != 0 )
+			snprintf( ack, sizeof(ack), "ACK" );
+		else if( ( frame.mFlags & I2C_MISSING_FLAG_ACK ) != 0 )
+			snprintf( ack, sizeof( ack ), "Missing ACK/NAK" );
 		else
-			direction = I2C_WRITE;
+			snprintf( ack, sizeof(ack), "NAK" );
 
-		if( direction == I2C_READ )
+		if( frame.mType == I2cAddress )
 		{
-			std::stringstream ss;
-			ss << "Setup Read to [" << number_str << "] + " << ack;
-			AddTabularText( ss.str().c_str() );
+			char number_str[128];
+			switch( mSettings->mAddressDisplay )
+			{
+			case NO_DIRECTION_7:
+				AnalyzerHelpers::GetNumberString( frame.mData1 >> 1, display_base, 7, number_str, 128 );
+				break;
+			case NO_DIRECTION_8:
+				AnalyzerHelpers::GetNumberString( frame.mData1 & 0xFE, display_base, 8, number_str, 128 );
+				break;
+			case YES_DIRECTION_8:
+				AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
+				break;
+			}
+
+			I2cDirection direction;
+			if( ( frame.mData1 & 0x1 ) != 0 )
+				direction = I2C_READ;
+			else
+				direction = I2C_WRITE;
+
+			if( direction == I2C_READ )
+			{
+				std::stringstream ss;
+				ss << "Setup Read to [" << number_str << "] + " << ack;
+				AddTabularText( ss.str().c_str() );
+			}else
+			{
+				std::stringstream ss;
+				ss << "Setup Write to [" << number_str << "] + " << ack;
+				AddTabularText( ss.str().c_str() );
+			}
 		}else
 		{
+			char number_str[128];
+			AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
 			std::stringstream ss;
-			ss << "Setup Write to [" << number_str << "] + " << ack;
+			ss << number_str << " + " << ack;
 			AddTabularText( ss.str().c_str() );
 		}
-	}else
-	{
-		char number_str[128];
-		AnalyzerHelpers::GetNumberString( frame.mData1, display_base, 8, number_str, 128 );
-		std::stringstream ss;
-		ss << number_str << " + " << ack;
-		AddTabularText( ss.str().c_str() );
-	}									
+	}
 }
 
 void EnrichableI2cAnalyzerResults::GeneratePacketTabularText( U64 /*packet_id*/, DisplayBase /*display_base*/ )  //unrefereced vars commented out to remove warnings.

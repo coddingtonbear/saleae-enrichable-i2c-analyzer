@@ -119,13 +119,13 @@ For each frame _displayed_, your script will receive on stdin the following tab-
   ending sample ID.
 * type: A hexadecimal integer indicating the frame's type;
 * flags: A hexadecimal integer indicating the frame's flags.
-* "mosi" or "miso"
+* "sda"
 * value: A hexadecimal integer indicating the frame's value. 
 
 Example:
 
 ```
-bubble	84ac	ab6f	3ae3012	3ae309b9	0	0	mosi	c6
+bubble	84ac	ab6f	3ae3012	3ae309b9	0	0	sda	c6
 ```
 
 If you would like a bubble to appear, your script should respond with at least one message to display above this frame in the analyzer.
@@ -161,13 +161,14 @@ For each frame _analyzed_, your script will receive on stdin the following tab-d
   ending sample ID.
 * type: A hexadecimal integer indicating the frame's type;
 * flags: A hexadecimal integer indicating the frame's flags.
-* mosi value: A hexadecimal integer indicating the frame's mosi value.
-* miso value: A hexadecimal integer indicating the frame's miso value.
+* value: A hexadecimal integer indicating the frame's SDA value.
+* (undefined): This field may contain data when analyzing protocols
+  other than I2c, but for I2c will always be undefined.
 
 Example:
 
 ```
-tabular	84ac	ab6f	3ae3012	3ae309b9	0	0	c6	fa
+tabular	84ac	ab6f	3ae3012	3ae309b9	0	0	c6	0	
 ```
 
 Your script should respond with any lines you would like to appear in the tabular results on the bottom right side of the UI.
@@ -199,13 +200,14 @@ For every frame _analyzed_, your script will receive on stdin the following tab-
   ending sample ID.
 * type: A hexadecimal integer indicating the frame's type;
 * flags: A hexadecimal integer indicating the frame's flags.
-* mosi value: A hexadecimal integer indicating the frame's mosi value.
-* miso value: A hexadecimal integer indicating the frame's miso value.
+* value: A hexadecimal integer indicating the frame's SDA value.
+* (undefined): This field may contain data when analyzing protocols
+  other than I2c, but for I2c will always be undefined.
 
 Example:
 
 ```
-marker	84ac	ab6f	8	3ae3012	3ae309b9	0	0	c6	fa
+marker	84ac	ab6f	8	3ae3012	3ae309b9	0	0	c6	0	
 ```
 
 Your script should respond with any number lines, each composed of three tab-separated values;
@@ -213,7 +215,7 @@ send an empty line to finish.
 
 * sample number: The (hexadecimal) sample number (within this frame) at which to
   display this marker.
-* "miso" or "mosi"
+* "sda"
 * marker type (see below)
 
 Possible marker types are:
@@ -233,12 +235,12 @@ Possible marker types are:
 
 See the above screenshot for examples.
 
-For example; if you want to show "DownArrow" on the first sample of miso,
-and "Stop" on the fourth sample of mosi:
+For example; if you want to show "DownArrow" on the first sample 
+and "Stop" on the fourth sample:
 
 ```
-0	miso	DownArrow
-4	mosi	Stop
+0	sda	DownArrow
+4	sda	Stop
 
 ```
 

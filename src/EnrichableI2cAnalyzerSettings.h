@@ -24,11 +24,13 @@ public:
 	Channel mSdaChannel;
 	Channel mSclChannel;
 	enum AddressDisplay mAddressDisplay;
+	const char* mParserCommand;
 
 protected:
 	std::auto_ptr< AnalyzerSettingInterfaceChannel > mSdaChannelInterface;
 	std::auto_ptr< AnalyzerSettingInterfaceChannel > mSclChannelInterface;
 	std::auto_ptr< AnalyzerSettingInterfaceNumberList > mAddressDisplayInterface;
+	std::auto_ptr< AnalyzerSettingInterfaceText >		mParserCommandInterface;
 };
 
 #endif //I2C_ANALYZER_SETTINGS

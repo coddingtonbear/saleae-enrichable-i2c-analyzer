@@ -23,9 +23,15 @@ EnrichableI2cAnalyzerSettings::EnrichableI2cAnalyzerSettings()
 	mAddressDisplayInterface->AddNumber( NO_DIRECTION_7, "7-bit, address bits only", "Displays the I2C address as a 7-bit number" );
 	mAddressDisplayInterface->SetNumber( mAddressDisplay );
 
+	mParserCommandInterface.reset(new AnalyzerSettingInterfaceText());
+	mParserCommandInterface->SetTitleAndTooltip("Enrichment Script", "Command to run for enriching displayed SPI data.");
+	mParserCommandInterface->SetTextType(AnalyzerSettingInterfaceText::NormalText);
+	mParserCommandInterface->SetText(mParserCommand);
+
 	AddInterface( mSdaChannelInterface.get() );
 	AddInterface( mSclChannelInterface.get() );
 	AddInterface( mAddressDisplayInterface.get() );
+	AddInterface( mParserCommandInterface.get() );
 
 	//AddExportOption( 0, "Export as text/csv file", "text (*.txt);;csv (*.csv)" );
 	AddExportOption( 0, "Export as text/csv file" );
@@ -67,12 +73,13 @@ void EnrichableI2cAnalyzerSettings::LoadSettings( const char* settings )
 
 	const char* name_string;	//the first thing in the archive is the name of the protocol analyzer that the data belongs to.
 	text_archive >> &name_string;
-	if( strcmp( name_string, "SaleaeI2CAnalyzer" ) != 0 )
-		AnalyzerHelpers::Assert( "SaleaeI2CAnalyzer: Provided with a settings string that doesn't belong to us;" );
+	if( strcmp( name_string, "SaleaeEnrichableI2CAnalyzer" ) != 0 )
+		AnalyzerHelpers::Assert( "SaleaeEnrichableI2CAnalyzer: Provided with a settings string that doesn't belong to us;" );
 
 	text_archive >> mSdaChannel;
 	text_archive >> mSclChannel;
 	text_archive >> *(U32*)&mAddressDisplay;
+	text_archive >>  &mParserCommand;
 
 	ClearChannels();
 	AddChannel( mSdaChannel, "SDA", true );
@@ -89,6 +96,7 @@ const char* EnrichableI2cAnalyzerSettings::SaveSettings()
 	text_archive << mSdaChannel;
 	text_archive << mSclChannel;
 	text_archive << mAddressDisplay;
+	text_archive <<  mParserCommand;
 
 	return SetReturnString( text_archive.GetString() );
 }
@@ -98,4 +106,5 @@ void EnrichableI2cAnalyzerSettings::UpdateInterfacesFromSettings()
 	mSdaChannelInterface->SetChannel( mSdaChannel );
 	mSclChannelInterface->SetChannel( mSclChannel );
 	mAddressDisplayInterface->SetNumber( mAddressDisplay );
+	mParserCommandInterface->SetText( mParserCommand );
 }
