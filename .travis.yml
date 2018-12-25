@@ -1,0 +1,9 @@
+os:
+- linux
+- osx
+language: cpp
+script:
+- ./.travis-build.sh
+env:
+  global:
+    - PYTHONUSERBASE=.
