@@ -17,4 +17,4 @@ src/EnrichableI2cSimulationDataGenerator.cpp
 src/EnrichableI2cSimulationDataGenerator.h
 )
 
-add_analyzer_plugin(i2c_analyzer SOURCES ${SOURCES})
+add_analyzer_plugin(enrichable_i2c_analyzer SOURCES ${SOURCES})
