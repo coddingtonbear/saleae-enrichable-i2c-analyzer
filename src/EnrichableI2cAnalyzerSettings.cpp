@@ -1,9 +1,9 @@
-#include "I2cAnalyzerSettings.h"
+#include "EnrichableI2cAnalyzerSettings.h"
 
 #include <AnalyzerHelpers.h>
 #include <cstring>
 
-I2cAnalyzerSettings::I2cAnalyzerSettings()
+EnrichableI2cAnalyzerSettings::EnrichableI2cAnalyzerSettings()
 :	mSdaChannel( UNDEFINED_CHANNEL ),
 	mSclChannel( UNDEFINED_CHANNEL ),
 	mAddressDisplay( YES_DIRECTION_8 )
@@ -37,11 +37,11 @@ I2cAnalyzerSettings::I2cAnalyzerSettings()
 	AddChannel( mSclChannel, "SCL", false );
 }
 
-I2cAnalyzerSettings::~I2cAnalyzerSettings()
+EnrichableI2cAnalyzerSettings::~EnrichableI2cAnalyzerSettings()
 {
 }
 
-bool I2cAnalyzerSettings::SetSettingsFromInterfaces()
+bool EnrichableI2cAnalyzerSettings::SetSettingsFromInterfaces()
 {
 	if( mSdaChannelInterface->GetChannel() == mSclChannelInterface->GetChannel() )
 	{
@@ -60,7 +60,7 @@ bool I2cAnalyzerSettings::SetSettingsFromInterfaces()
 	return true;
 }
 
-void I2cAnalyzerSettings::LoadSettings( const char* settings )
+void EnrichableI2cAnalyzerSettings::LoadSettings( const char* settings )
 {
 	SimpleArchive text_archive;
 	text_archive.SetString( settings );
@@ -81,7 +81,7 @@ void I2cAnalyzerSettings::LoadSettings( const char* settings )
 	UpdateInterfacesFromSettings();
 }
 
-const char* I2cAnalyzerSettings::SaveSettings()
+const char* EnrichableI2cAnalyzerSettings::SaveSettings()
 {
 	SimpleArchive text_archive;
 
@@ -93,7 +93,7 @@ const char* I2cAnalyzerSettings::SaveSettings()
 	return SetReturnString( text_archive.GetString() );
 }
 
-void I2cAnalyzerSettings::UpdateInterfacesFromSettings()
+void EnrichableI2cAnalyzerSettings::UpdateInterfacesFromSettings()
 {
 	mSdaChannelInterface->SetChannel( mSdaChannel );
 	mSclChannelInterface->SetChannel( mSclChannel );

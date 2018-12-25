@@ -1,15 +1,15 @@
-#include "I2cSimulationDataGenerator.h"
+#include "EnrichableI2cSimulationDataGenerator.h"
 
 
-I2cSimulationDataGenerator::I2cSimulationDataGenerator()
+EnrichableI2cSimulationDataGenerator::EnrichableI2cSimulationDataGenerator()
 {
 }
 
-I2cSimulationDataGenerator::~I2cSimulationDataGenerator()
+EnrichableI2cSimulationDataGenerator::~EnrichableI2cSimulationDataGenerator()
 {
 }
 
-void I2cSimulationDataGenerator::Initialize( U32 simulation_sample_rate, I2cAnalyzerSettings* settings )
+void EnrichableI2cSimulationDataGenerator::Initialize( U32 simulation_sample_rate, EnrichableI2cAnalyzerSettings* settings )
 {
 	mSimulationSampleRateHz = simulation_sample_rate;
 	mSettings = settings;
@@ -24,7 +24,7 @@ void I2cSimulationDataGenerator::Initialize( U32 simulation_sample_rate, I2cAnal
 	mValue = 0;
 }
 
-U32 I2cSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_requested, U32 sample_rate, SimulationChannelDescriptor** simulation_channels )
+U32 EnrichableI2cSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_requested, U32 sample_rate, SimulationChannelDescriptor** simulation_channels )
 {
 	U64 adjusted_largest_sample_requested = AnalyzerHelpers::AdjustSimulationTargetSample( largest_sample_requested, sample_rate, mSimulationSampleRateHz );
 
@@ -62,7 +62,7 @@ U32 I2cSimulationDataGenerator::GenerateSimulationData( U64 largest_sample_reque
 
 
 
-void I2cSimulationDataGenerator::CreateI2cTransaction( U8 address, I2cDirection direction, U8 data )
+void EnrichableI2cSimulationDataGenerator::CreateI2cTransaction( U8 address, I2cDirection direction, U8 data )
 {
 	U8 command = address << 1;
 	if( direction == I2C_READ )
@@ -75,7 +75,7 @@ void I2cSimulationDataGenerator::CreateI2cTransaction( U8 address, I2cDirection 
 	CreateStop();
 }
 
-void I2cSimulationDataGenerator::CreateI2cByte( U8 data, I2cResponse reply )
+void EnrichableI2cSimulationDataGenerator::CreateI2cByte( U8 data, I2cResponse reply )
 {
 	if( mScl->GetCurrentBitState() == BIT_HIGH )
 	{
@@ -99,7 +99,7 @@ void I2cSimulationDataGenerator::CreateI2cByte( U8 data, I2cResponse reply )
 	mI2cSimulationChannels.AdvanceAll( mClockGenerator.AdvanceByHalfPeriod( 4.0 ) );
 }
 
-void I2cSimulationDataGenerator::CreateBit( BitState bit_state )
+void EnrichableI2cSimulationDataGenerator::CreateBit( BitState bit_state )
 {
 	if( mScl->GetCurrentBitState() != BIT_LOW )
 		AnalyzerHelpers::Assert( "CreateBit expects to be entered with scl low" );
@@ -117,7 +117,7 @@ void I2cSimulationDataGenerator::CreateBit( BitState bit_state )
 	mScl->Transition(); //negedge
 }
 
-void I2cSimulationDataGenerator::CreateStart()
+void EnrichableI2cSimulationDataGenerator::CreateStart()
 {
 	mI2cSimulationChannels.AdvanceAll( mClockGenerator.AdvanceByHalfPeriod( 1.0 ) );
 
@@ -137,7 +137,7 @@ void I2cSimulationDataGenerator::CreateStart()
 }
 
 
-void I2cSimulationDataGenerator::CreateStop()
+void EnrichableI2cSimulationDataGenerator::CreateStop()
 {
 	mI2cSimulationChannels.AdvanceAll( mClockGenerator.AdvanceByHalfPeriod( 1.0 ) );
 
@@ -156,12 +156,12 @@ void I2cSimulationDataGenerator::CreateStop()
 	mI2cSimulationChannels.AdvanceAll( mClockGenerator.AdvanceByHalfPeriod( 1.0 ) );
 }
 
-void I2cSimulationDataGenerator::CreateRestart()
+void EnrichableI2cSimulationDataGenerator::CreateRestart()
 {
 	CreateStart();
 }
 
-void I2cSimulationDataGenerator::SafeChangeSda( BitState bit_state )
+void EnrichableI2cSimulationDataGenerator::SafeChangeSda( BitState bit_state )
 {
 	if( mSda->GetCurrentBitState() != bit_state )
 	{

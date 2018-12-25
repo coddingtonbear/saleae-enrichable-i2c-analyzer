@@ -7,14 +7,14 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(ExternalAnalyzerSDK)
 
 set(SOURCES 
-src/I2cAnalyzer.cpp
-src/I2cAnalyzer.h
-src/I2cAnalyzerResults.cpp
-src/I2cAnalyzerResults.h
-src/I2cAnalyzerSettings.cpp
-src/I2cAnalyzerSettings.h
-src/I2cSimulationDataGenerator.cpp
-src/I2cSimulationDataGenerator.h
+src/EnrichableI2cAnalyzer.cpp
+src/EnrichableI2cAnalyzer.h
+src/EnrichableI2cAnalyzerResults.cpp
+src/EnrichableI2cAnalyzerResults.h
+src/EnrichableI2cAnalyzerSettings.cpp
+src/EnrichableI2cAnalyzerSettings.h
+src/EnrichableI2cSimulationDataGenerator.cpp
+src/EnrichableI2cSimulationDataGenerator.h
 )
 
 add_analyzer_plugin(i2c_analyzer SOURCES ${SOURCES})

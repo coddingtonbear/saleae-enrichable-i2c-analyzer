@@ -1,28 +1,28 @@
-#include "I2cAnalyzer.h"
-#include "I2cAnalyzerSettings.h"
+#include "EnrichableI2cAnalyzer.h"
+#include "EnrichableI2cAnalyzerSettings.h"
 #include <AnalyzerChannelData.h>
 
-I2cAnalyzer::I2cAnalyzer()
+EnrichableI2cAnalyzer::EnrichableI2cAnalyzer()
 :	Analyzer2(),  
-	mSettings( new I2cAnalyzerSettings() ),
+	mSettings( new EnrichableI2cAnalyzerSettings() ),
 	mSimulationInitilized( false )
 {
 	SetAnalyzerSettings( mSettings.get() );
 }
 
-I2cAnalyzer::~I2cAnalyzer()
+EnrichableI2cAnalyzer::~EnrichableI2cAnalyzer()
 {
 	KillThread();
 }
 
-void I2cAnalyzer::SetupResults()
+void EnrichableI2cAnalyzer::SetupResults()
 {
-	mResults.reset( new I2cAnalyzerResults( this, mSettings.get() ) );
+	mResults.reset( new EnrichableI2cAnalyzerResults( this, mSettings.get() ) );
 	SetAnalyzerResults( mResults.get() );
 	mResults->AddChannelBubblesWillAppearOn( mSettings->mSdaChannel );
 }
 
-void I2cAnalyzer::WorkerThread()
+void EnrichableI2cAnalyzer::WorkerThread()
 {
 	mSampleRateHz = GetSampleRate();
 	mNeedAddress = true;
@@ -40,7 +40,7 @@ void I2cAnalyzer::WorkerThread()
 	}
 }
 
-void I2cAnalyzer::GetByte()
+void EnrichableI2cAnalyzer::GetByte()
 {
 	mArrowLocataions.clear();
 	U64 value;
@@ -104,7 +104,7 @@ void I2cAnalyzer::GetByte()
 	result &= GetBitPartTwo();
 }
 
-bool I2cAnalyzer::GetBit( BitState& bit_state, U64& sck_rising_edge )
+bool EnrichableI2cAnalyzer::GetBit( BitState& bit_state, U64& sck_rising_edge )
 {
 	//SCL must be low coming into this function
 	mScl->AdvanceToNextEdge(); //posedge
@@ -144,7 +144,7 @@ bool I2cAnalyzer::GetBit( BitState& bit_state, U64& sck_rising_edge )
 	return result;
 }
 
-bool I2cAnalyzer::GetBitPartOne( BitState& bit_state, U64& sck_rising_edge, U64& frame_end_sample )
+bool EnrichableI2cAnalyzer::GetBitPartOne( BitState& bit_state, U64& sck_rising_edge, U64& frame_end_sample )
 {
 	//SCL must be low coming into this function
 	mScl->AdvanceToNextEdge(); //posedge
@@ -197,7 +197,7 @@ bool I2cAnalyzer::GetBitPartOne( BitState& bit_state, U64& sck_rising_edge, U64&
 	
 }
 
-bool I2cAnalyzer::GetBitPartTwo()
+bool EnrichableI2cAnalyzer::GetBitPartTwo()
 {
 	//the sda and scl should be synced up, and we are either on a stop/start condition (clock high) or we're on a regular bit( clock high).
 	//we also should not expect any more start/stop conditions before the next falling edge, I beleive.
@@ -215,7 +215,7 @@ bool I2cAnalyzer::GetBitPartTwo()
 	return result;
 }
 
-void I2cAnalyzer::RecordStartStopBit()
+void EnrichableI2cAnalyzer::RecordStartStopBit()
 {
 	if( mSda->GetBitState() == BIT_LOW )
 	{
@@ -233,7 +233,7 @@ void I2cAnalyzer::RecordStartStopBit()
 
 }
 
-void I2cAnalyzer::AdvanceToStartBit()
+void EnrichableI2cAnalyzer::AdvanceToStartBit()
 {
 	for( ; ; )
 	{
@@ -250,12 +250,12 @@ void I2cAnalyzer::AdvanceToStartBit()
 	mResults->AddMarker( mSda->GetSampleNumber(), AnalyzerResults::Start, mSettings->mSdaChannel );
 }
 
-bool I2cAnalyzer::NeedsRerun()
+bool EnrichableI2cAnalyzer::NeedsRerun()
 {
 	return false;
 }
 
-U32 I2cAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate, SimulationChannelDescriptor** simulation_channels )
+U32 EnrichableI2cAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate, SimulationChannelDescriptor** simulation_channels )
 {
 	if( mSimulationInitilized == false )
 	{
@@ -266,12 +266,12 @@ U32 I2cAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sa
 	return mSimulationDataGenerator.GenerateSimulationData( minimum_sample_index, device_sample_rate, simulation_channels );
 }
 
-U32 I2cAnalyzer::GetMinimumSampleRateHz()
+U32 EnrichableI2cAnalyzer::GetMinimumSampleRateHz()
 {
 	return 2000000;
 }
 
-const char* I2cAnalyzer::GetAnalyzerName() const
+const char* EnrichableI2cAnalyzer::GetAnalyzerName() const
 {
 	return "I2C";
 }
@@ -283,7 +283,7 @@ const char* GetAnalyzerName()
 
 Analyzer* CreateAnalyzer()
 {
-	return new I2cAnalyzer();
+	return new EnrichableI2cAnalyzer();
 }
 
 void DestroyAnalyzer( Analyzer* analyzer )

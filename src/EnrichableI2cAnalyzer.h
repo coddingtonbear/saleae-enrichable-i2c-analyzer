@@ -2,15 +2,15 @@
 #define SERIAL_ANALYZER_H
 
 #include <Analyzer.h>
-#include "I2cAnalyzerResults.h"
-#include "I2cSimulationDataGenerator.h"
+#include "EnrichableI2cAnalyzerResults.h"
+#include "EnrichableI2cSimulationDataGenerator.h"
 
-class I2cAnalyzerSettings;
-class I2cAnalyzer : public Analyzer2
+class EnrichableI2cAnalyzerSettings;
+class EnrichableI2cAnalyzer : public Analyzer2
 {
 public:
-	I2cAnalyzer();
-	virtual ~I2cAnalyzer();
+	EnrichableI2cAnalyzer();
+	virtual ~EnrichableI2cAnalyzer();
 	virtual void SetupResults();
 	virtual void WorkerThread();
 
@@ -33,12 +33,12 @@ protected: //functions
 	void RecordStartStopBit();
 
 protected: //vars
-	std::auto_ptr< I2cAnalyzerSettings > mSettings;
-	std::auto_ptr< I2cAnalyzerResults > mResults;
+	std::auto_ptr< EnrichableI2cAnalyzerSettings > mSettings;
+	std::auto_ptr< EnrichableI2cAnalyzerResults > mResults;
 	AnalyzerChannelData* mSda;
 	AnalyzerChannelData* mScl;
 
-	I2cSimulationDataGenerator mSimulationDataGenerator;
+	EnrichableI2cSimulationDataGenerator mSimulationDataGenerator;
 	bool mSimulationInitilized;
 
 	//Serial analysis vars:

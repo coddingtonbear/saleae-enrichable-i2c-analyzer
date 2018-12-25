@@ -2,20 +2,20 @@
 #define SERIAL_SIMULATION_DATA_GENERATOR
 
 #include <AnalyzerHelpers.h>
-#include "I2cAnalyzerSettings.h"
+#include "EnrichableI2cAnalyzerSettings.h"
 #include <stdlib.h>
 
-class I2cSimulationDataGenerator
+class EnrichableI2cSimulationDataGenerator
 {
 public:
-	I2cSimulationDataGenerator();
-	~I2cSimulationDataGenerator();
+	EnrichableI2cSimulationDataGenerator();
+	~EnrichableI2cSimulationDataGenerator();
 
-	void Initialize( U32 simulation_sample_rate, I2cAnalyzerSettings* settings );
+	void Initialize( U32 simulation_sample_rate, EnrichableI2cAnalyzerSettings* settings );
 	U32 GenerateSimulationData( U64 newest_sample_requested, U32 sample_rate, SimulationChannelDescriptor** simulation_channels );
 
 protected:
-	I2cAnalyzerSettings* mSettings;
+	EnrichableI2cAnalyzerSettings* mSettings;
 	U32 mSimulationSampleRateHz;
 	U8 mValue;
 

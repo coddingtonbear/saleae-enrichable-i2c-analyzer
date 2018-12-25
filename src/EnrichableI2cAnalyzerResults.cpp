@@ -1,23 +1,23 @@
-#include "I2cAnalyzerResults.h"
+#include "EnrichableI2cAnalyzerResults.h"
 #include <AnalyzerHelpers.h>
-#include "I2cAnalyzer.h"
-#include "I2cAnalyzerSettings.h"
+#include "EnrichableI2cAnalyzer.h"
+#include "EnrichableI2cAnalyzerSettings.h"
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
 
-I2cAnalyzerResults::I2cAnalyzerResults( I2cAnalyzer* analyzer, I2cAnalyzerSettings* settings )
+EnrichableI2cAnalyzerResults::EnrichableI2cAnalyzerResults( EnrichableI2cAnalyzer* analyzer, EnrichableI2cAnalyzerSettings* settings )
 :	AnalyzerResults(),
 	mSettings( settings ),
 	mAnalyzer( analyzer )
 {
 }
 
-I2cAnalyzerResults::~I2cAnalyzerResults()
+EnrichableI2cAnalyzerResults::~EnrichableI2cAnalyzerResults()
 {
 }
 
-void I2cAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*channel*/, DisplayBase display_base )  //unrefereced vars commented out to remove warnings.
+void EnrichableI2cAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*channel*/, DisplayBase display_base )  //unrefereced vars commented out to remove warnings.
 {
 	//we only need to pay attention to 'channel' if we're making bubbles for more than one channel (as set by AddChannelBubblesWillAppearOn)
 	ClearResultStrings();
@@ -103,7 +103,7 @@ void I2cAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel& /*channel
 	}													
 }
 
-void I2cAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 /*export_type_user_id*/ )
+void EnrichableI2cAnalyzerResults::GenerateExportFile( const char* file, DisplayBase display_base, U32 /*export_type_user_id*/ )
 {
 	//export_type_user_id is only important if we have more than one export type.
 
@@ -198,7 +198,7 @@ void I2cAnalyzerResults::GenerateExportFile( const char* file, DisplayBase displ
 	AnalyzerHelpers::EndFile( f );
 }
 
-void I2cAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase display_base )
+void EnrichableI2cAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase display_base )
 {
     ClearTabularText();
 
@@ -255,13 +255,13 @@ void I2cAnalyzerResults::GenerateFrameTabularText( U64 frame_index, DisplayBase 
 	}									
 }
 
-void I2cAnalyzerResults::GeneratePacketTabularText( U64 /*packet_id*/, DisplayBase /*display_base*/ )  //unrefereced vars commented out to remove warnings.
+void EnrichableI2cAnalyzerResults::GeneratePacketTabularText( U64 /*packet_id*/, DisplayBase /*display_base*/ )  //unrefereced vars commented out to remove warnings.
 {
 	ClearResultStrings();
 	AddResultString( "not supported" );
 }
 
-void I2cAnalyzerResults::GenerateTransactionTabularText( U64 /*transaction_id*/, DisplayBase /*display_base*/ )  //unrefereced vars commented out to remove warnings.
+void EnrichableI2cAnalyzerResults::GenerateTransactionTabularText( U64 /*transaction_id*/, DisplayBase /*display_base*/ )  //unrefereced vars commented out to remove warnings.
 {
 	ClearResultStrings();
 	AddResultString( "not supported" );
