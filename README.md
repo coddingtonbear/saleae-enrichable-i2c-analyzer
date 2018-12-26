@@ -105,7 +105,7 @@ but that line may be empty if you have no desire to handle the received message 
 
 ### Bubbles
 
-![Bubbles](https://s3-us-west-2.amazonaws.com/coddingtonbear-public/github/saleae-enrichable-i2c-analyzer/bubbles_2.png)
+![Bubbles](https://s3-us-west-2.amazonaws.com/coddingtonbear-public/github/saleae-enrichable-i2c-analyzer/bubbles_3.png)
 
 For each frame _displayed_, your script will receive on stdin the following tab-delimited fields ending with a newline character:
 
