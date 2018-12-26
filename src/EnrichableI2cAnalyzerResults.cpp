@@ -1,15 +1,20 @@
 #include "EnrichableI2cAnalyzerResults.h"
 #include <AnalyzerHelpers.h>
 #include "EnrichableI2cAnalyzer.h"
+#include "EnrichableAnalyzerSubprocess.h"
 #include "EnrichableI2cAnalyzerSettings.h"
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
 
-EnrichableI2cAnalyzerResults::EnrichableI2cAnalyzerResults( EnrichableI2cAnalyzer* analyzer, EnrichableI2cAnalyzerSettings* settings )
-:	AnalyzerResults(),
+EnrichableI2cAnalyzerResults::EnrichableI2cAnalyzerResults(
+	EnrichableI2cAnalyzer* analyzer,
+	EnrichableI2cAnalyzerSettings* settings,
+	EnrichableAnalyzerSubprocess* subprocess
+) :	AnalyzerResults(),
 	mSettings( settings ),
-	mAnalyzer( analyzer )
+	mAnalyzer( analyzer ),
+	mSubprocess( subprocess )
 {
 }
 
@@ -24,46 +29,16 @@ void EnrichableI2cAnalyzerResults::GenerateBubbleText( U64 frame_index, Channel&
 	Frame frame = GetFrame( frame_index );
 	std::stringstream outputStream;
 
-	if(mAnalyzer->featureBubble) {
-		U64 packet_id = GetPacketContainingFrameSequential( frame_index );
-
-		outputStream << BUBBLE_PREFIX;
-		outputStream << UNIT_SEPARATOR;
-		if(packet_id != INVALID_RESULT_INDEX) {
-			outputStream << std::hex << packet_id;
+	if(mSubprocess->BubbleEnabled()) {
+		std::vector<std::string> bubbles = mSubprocess->EmitBubble(
+			GetPacketContainingFrameSequential(frame_index),
+			frame_index,
+			frame,
+			"sda"
+		);
+		for(const std::string& bubbleText: bubbles) {
+			AddResultString(bubbleText.c_str());
 		}
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << frame_index;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << frame.mStartingSampleInclusive;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << frame.mEndingSampleInclusive;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << (U64)frame.mType;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << (U64)frame.mFlags;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << SDA_PREFIX;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << frame.mData1;
-		outputStream << LINE_SEPARATOR;
-		std::string value = outputStream.str();
-
-		mAnalyzer->LockSubprocess();
-		mAnalyzer->SendOutputLine(value.c_str(), value.length());
-		char bubbleText[256];
-		while(true) {
-			mAnalyzer->GetInputLine(
-				bubbleText,
-				256
-			);
-			if(strlen(bubbleText) > 0) {
-				AddResultString(bubbleText);
-			} else {
-				break;
-			}
-		}
-		mAnalyzer->UnlockSubprocess();
 	} else {
 		char ack[32];
 		if( ( frame.mFlags & I2C_FLAG_ACK ) != 0 )
@@ -247,48 +222,15 @@ void EnrichableI2cAnalyzerResults::GenerateFrameTabularText( U64 frame_index, Di
 
 	Frame frame = GetFrame( frame_index );
 
-	if(mAnalyzer->featureTabular) {
-		U64 packet_id = GetPacketContainingFrameSequential( frame_index );
-		std::stringstream outputStream;
-
-		outputStream << TABULAR_PREFIX;
-		outputStream << UNIT_SEPARATOR;
-		if(packet_id != INVALID_RESULT_INDEX) {
-			outputStream << std::hex << packet_id;
+	if(mSubprocess->TabularEnabled()) {
+		std::vector<std::string> tabularLines = mSubprocess->EmitTabular(
+			GetPacketContainingFrameSequential( frame_index ),
+			frame_index,
+			frame
+		);
+		for(const std::string& tabularText: tabularLines) {
+			AddTabularText(tabularText.c_str());
 		}
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << frame_index;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << frame.mStartingSampleInclusive;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << frame.mEndingSampleInclusive;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << (U64)frame.mType;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << (U64)frame.mFlags;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << frame.mData1;
-		outputStream << UNIT_SEPARATOR;
-		outputStream << std::hex << frame.mData2;
-		outputStream << LINE_SEPARATOR;
-
-		std::string value = outputStream.str();
-
-		mAnalyzer->LockSubprocess();
-		mAnalyzer->SendOutputLine(value.c_str(), value.length());
-		char tabularText[512];
-		while(true) {
-			mAnalyzer->GetInputLine(
-				tabularText,
-				512
-			);
-			if(strlen(tabularText) > 0) {
-				AddTabularText(tabularText);
-			} else {
-				break;
-			}
-		}
-		mAnalyzer->UnlockSubprocess();
 	} else {
 		char ack[32];
 		if( ( frame.mFlags & I2C_FLAG_ACK ) != 0 )
