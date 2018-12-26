@@ -72,10 +72,10 @@ cmake --build .
 Unfortunately, Windows is not currently supported due to the fact that this library relies upon Posix interfaces like `pipe` and `fork`.
 If you would like to add support for Windows, it should be as easy as implementing Windows-compatible versions of the following functions:
 
-* `void EnrichableI2cAnalyzer::StartSubprocess()`
-* `void EnrichableI2cAnalyzer::StopSubprocess()`
-* `bool EnrichableI2cAnalyzer::SendOutputLine(const char* buffer, unsigned bufferLength)`
-* `bool EnrichableI2cAnalyzer::GetInputLine(char* buffer, unsigned bufferLength)`
+* `void EnrichableAnalyzerSubprocess::StartSubprocess()`
+* `void EnrichableAnalyzerSubprocess::StopSubprocess()`
+* `bool EnrichableAnalyzerSubprocess::SendOutputLine(const char* buffer, unsigned bufferLength)`
+* `bool EnrichableAnalyzerSubprocess::GetInputLine(char* buffer, unsigned bufferLength)`
 
 There _are_ Windows equivalents of the aforementioned `pipe` and `fork`
 (see more information here: https://support.microsoft.com/en-us/help/190351/how-to-spawn-console-processes-with-redirected-standard-handles),
