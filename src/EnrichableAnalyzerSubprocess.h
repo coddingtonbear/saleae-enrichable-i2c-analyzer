@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#define SUBPROCESS_DEBUG
+//#define SUBPROCESS_DEBUG
 
 #define BUBBLE_PREFIX "bubble"
 #define MARKER_PREFIX "marker"
