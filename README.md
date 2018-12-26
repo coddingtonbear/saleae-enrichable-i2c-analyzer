@@ -1,4 +1,4 @@
-# Saleae I2C Analyzer
+# Enrichable I2C Analyzer for Saleae Logic
 
 [![Build Status](https://travis-ci.org/coddingtonbear/saleae-enrichable-i2c-analyzer.svg?branch=master)](https://travis-ci.org/coddingtonbear/saleae-enrichable-i2c-analyzer)
 
