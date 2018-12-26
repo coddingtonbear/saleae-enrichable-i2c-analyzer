@@ -284,7 +284,9 @@ There are two implemented frame types:
 
 ## Frame Flags
 
-There are two implemented flags:
+There are four implemented flags:
 
 * `(1 << 0)`: I2C Flag ACK
 * `(1 << 1)`: I2C Missing Flack ACK
+* `(1 << 6)`: Display as warning
+* `(1 << 7)`: Display as error

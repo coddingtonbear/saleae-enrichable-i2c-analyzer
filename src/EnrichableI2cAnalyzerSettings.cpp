@@ -6,7 +6,8 @@
 EnrichableI2cAnalyzerSettings::EnrichableI2cAnalyzerSettings()
 :	mSdaChannel( UNDEFINED_CHANNEL ),
 	mSclChannel( UNDEFINED_CHANNEL ),
-	mAddressDisplay( YES_DIRECTION_8 )
+	mAddressDisplay( YES_DIRECTION_8 ),
+	mParserCommand("")
 {
 	mSdaChannelInterface.reset( new AnalyzerSettingInterfaceChannel() );
 	mSdaChannelInterface->SetTitleAndTooltip( "SDA", "Serial Data Line" );
@@ -24,7 +25,7 @@ EnrichableI2cAnalyzerSettings::EnrichableI2cAnalyzerSettings()
 	mAddressDisplayInterface->SetNumber( mAddressDisplay );
 
 	mParserCommandInterface.reset(new AnalyzerSettingInterfaceText());
-	mParserCommandInterface->SetTitleAndTooltip("Enrichment Script", "Command to run for enriching displayed SPI data.");
+	mParserCommandInterface->SetTitleAndTooltip("Enrichment Script", "Command to run for enriching displayed I2C data.");
 	mParserCommandInterface->SetTextType(AnalyzerSettingInterfaceText::NormalText);
 	mParserCommandInterface->SetText(mParserCommand);
 
@@ -58,6 +59,7 @@ bool EnrichableI2cAnalyzerSettings::SetSettingsFromInterfaces()
 	mSdaChannel = mSdaChannelInterface->GetChannel();
 	mSclChannel = mSclChannelInterface->GetChannel();
 	mAddressDisplay = AddressDisplay( U32( mAddressDisplayInterface->GetNumber() ) );
+	mParserCommand = mParserCommandInterface->GetText();
 
 	ClearChannels();
 	AddChannel( mSdaChannel, "SDA", true );
@@ -92,7 +94,7 @@ const char* EnrichableI2cAnalyzerSettings::SaveSettings()
 {
 	SimpleArchive text_archive;
 
-	text_archive << "SaleaeI2CAnalyzer";
+	text_archive << "SaleaeEnrichableI2CAnalyzer";
 	text_archive << mSdaChannel;
 	text_archive << mSclChannel;
 	text_archive << mAddressDisplay;
