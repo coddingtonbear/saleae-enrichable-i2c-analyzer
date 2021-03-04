@@ -1,3 +1,5 @@
+WARNING: This project is no longer maintained or necessary!  Saleae added python analyzer support in their latest versions of Logic, and their handling of this problem is much more elegant.
+
 # Enrichable I2C Analyzer for Saleae Logic
 
 [![Build Status](https://travis-ci.org/coddingtonbear/saleae-enrichable-i2c-analyzer.svg?branch=master)](https://travis-ci.org/coddingtonbear/saleae-enrichable-i2c-analyzer)
